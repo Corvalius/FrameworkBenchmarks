@@ -35,6 +35,9 @@ namespace Benchmarks.Configuration
         [ScenarioPath("/db/dapper")]
         public bool DbSingleQueryDapper { get; set; }
 
+        [ScenarioPath("/db/raven")]
+        public bool DbSingleQueryRaven { get; set; }
+
         [ScenarioPath("/queries/raw")]
         public bool DbMultiQueryRaw { get; set; }
 
@@ -43,6 +46,9 @@ namespace Benchmarks.Configuration
 
         [ScenarioPath("/queries/dapper")]
         public bool DbMultiQueryDapper { get; set; }
+
+        [ScenarioPath("/queries/raven")]
+        public bool DbMultiQueryRaven { get; set; }
 
         [ScenarioPath("/updates/raw")]
         public bool DbMultiUpdateRaw { get; set; }
@@ -53,6 +59,9 @@ namespace Benchmarks.Configuration
         [ScenarioPath("/updates/dapper")]
         public bool DbMultiUpdateDapper { get; set; }
 
+        [ScenarioPath("/updates/raven")]
+        public bool DbMultiUpdateRaven { get; set; }
+
         [ScenarioPath("/fortunes/raw")]
         public bool DbFortunesRaw { get; set; }
 
@@ -61,6 +70,9 @@ namespace Benchmarks.Configuration
 
         [ScenarioPath("/fortunes/dapper")]
         public bool DbFortunesDapper { get; set; }
+
+        [ScenarioPath("/fortunes/raven")]
+        public bool DbFortunesRaven { get; set; }
 
         [ScenarioPath("/mvc/plaintext")]
         public bool MvcPlaintext { get; set; }
@@ -80,6 +92,9 @@ namespace Benchmarks.Configuration
         [ScenarioPath("/mvc/db/ef")]
         public bool MvcDbSingleQueryEf { get; set; }
 
+        [ScenarioPath("/mvc/db/raven")]
+        public bool MvcDbSingleQueryRaven { get; set; }
+
         [ScenarioPath("/mvc/queries/raw")]
         public bool MvcDbMultiQueryRaw { get; set; }
 
@@ -88,6 +103,9 @@ namespace Benchmarks.Configuration
 
         [ScenarioPath("/mvc/queries/ef")]
         public bool MvcDbMultiQueryEf { get; set; }
+
+        [ScenarioPath("/mvc/queries/raven")]
+        public bool MvcDbMultiQueryRaven { get; set; }
 
         [ScenarioPath("/mvc/updates/raw")]
         public bool MvcDbMultiUpdateRaw { get; set; }
@@ -98,11 +116,17 @@ namespace Benchmarks.Configuration
         [ScenarioPath("/mvc/updates/ef")]
         public bool MvcDbMultiUpdateEf { get; set; }
 
+        [ScenarioPath("/mvc/updates/raven")]
+        public bool MvcDbMultiUpdateRaven { get; set; }
+
         [ScenarioPath("/mvc/fortunes/raw")]
         public bool MvcDbFortunesRaw { get; set; }
 
         [ScenarioPath("/mvc/fortunes/ef")]
         public bool MvcDbFortunesEf { get; set; }
+
+        [ScenarioPath("/mvc/fortunes/raven")]
+        public bool MvcDbFortunesRaven { get; set; }
 
         [ScenarioPath("/mvc/fortunes/dapper")]
         public bool MvcDbFortunesDapper { get; set; }

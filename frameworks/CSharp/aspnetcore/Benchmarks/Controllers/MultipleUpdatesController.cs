@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Benchmarks.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,15 @@ namespace Benchmarks.Controllers
         {
             queries = queries < 1 ? 1 : queries > 500 ? 500 : queries;
             var db = HttpContext.RequestServices.GetRequiredService<T>();
+            return db.LoadMultipleUpdatesRows(queries);
+        }
+
+        [HttpGet("raven")]
+        [Produces("application/json")]
+        public Task<IEnumerable<WorldRaven>> Raven(int queries = 1)
+        {
+            queries = queries < 1 ? 1 : queries > 500 ? 500 : queries;
+            var db = HttpContext.RequestServices.GetRequiredService<RavenDb>();
             return db.LoadMultipleUpdatesRows(queries);
         }
     }

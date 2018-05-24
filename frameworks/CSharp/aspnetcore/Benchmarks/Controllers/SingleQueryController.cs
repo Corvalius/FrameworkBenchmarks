@@ -37,5 +37,13 @@ namespace Benchmarks.Controllers
             var db = HttpContext.RequestServices.GetRequiredService<T>();
             return db.LoadSingleQueryRow();
         }
+
+        [HttpGet("raven")]
+        [Produces("application/json")]
+        public Task<WorldRaven> Raven()
+        {
+            var db = HttpContext.RequestServices.GetRequiredService<RavenDb>();
+            return db.LoadSingleQueryRow();
+        }
     }
 }
