@@ -22,9 +22,24 @@ Try
 {
     Write-Host "Starting RavenDB Service"
     Invoke-Expression -Command ".\$rvn windows-service register --service-name $name";
+
+    # Starting the service
     Start-Service -Name $name
 
-    Start-Sleep -s 1
+    $serviceInstance = Get-Service -Name $name
+    
+    # We are waiting to ensure that the service is up.
+    $tries = 0
+    while ($serviceInstance.Status -ne 'Running')
+    {
+        if ($tries > 10)
+        {
+            Write-Error "Service couldn't start in 20 seconds."
+            exit 5
+        }
+        Start-Sleep -seconds 2  
+        $tries = $tries + 1
+    }    
 
     # TODO: We need to create the database "World" 
 
@@ -32,13 +47,17 @@ Try
     
     # TODO: Import using the http://localhost:8080/databases/{database}/smuggler/import-dir?dir={directory} both databases.    
 
-    Write-Host "Stopping RavenDB Service"
-    Stop-Service -Name $name    
+
+    # We will wait forever or the service goes down, whatever happens first :D
+    while ($serviceInstance.Status -eq 'Running')
+    {
+        Write-Host 'Service is running.'
+        Start-Sleep -seconds 10    
+        $serviceInstance.Refresh()
+    }
 }
 catch
 {
     write-error $_.Exception
     exit 4
 }
-
-Invoke-Expression "./Raven.Server.exe"
