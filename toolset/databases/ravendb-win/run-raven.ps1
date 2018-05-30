@@ -1,63 +1,42 @@
 $ErrorActionPreference='Stop'
 $ProgressPreference = "SilentlyContinue";
 
-function SetAclOnServerDirectory($dir) {
-    $acl = Get-Acl $dir
-    $permissions = "LocalService", "FullControl", "ContainerInherit, ObjectInherit", "None", "Allow"
-    $rule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $permissions
-    $acl.SetAccessRuleProtection($False, $False)
-    $acl.AddAccessRule($rule)
-    Set-Acl -Path $dir -AclObject $acl
+if ([string]::IsNullOrEmpty($env:RAVEN_SETTINGS) -eq $False) {
+    Set-Content -Path "settings.json" -Value "$env:RAVEN_SETTINGS"
 }
 
-$rvn = "rvn.exe";
-$serverDir = "C:\RavenDB\Server"
+$hostname = & "hostname.exe"
+$env:RAVEN_ServerUrl = "http://$($hostname):8080"
 
-SetAclOnServerDirectory $serverDir
-$name = 'RavenDB'
+$COMMAND=".\Raven.Server.exe"
+$ravenProcess = Start-Process -FilePath $COMMAND -NoNewWindow
 
-Push-Location $serverDir;
+write-host "Started RavenDB."
+Start-Sleep -Seconds 2
 
-Try
-{
-    Write-Host "Starting RavenDB Service"
-    Invoke-Expression -Command ".\$rvn windows-service register --service-name $name";
-
-    # Starting the service
-    Start-Service -Name $name
-
-    $serviceInstance = Get-Service -Name $name
-    
-    # We are waiting to ensure that the service is up.
-    $tries = 0
-    while ($serviceInstance.Status -ne 'Running')
-    {
-        if ($tries > 10)
-        {
-            Write-Error "Service couldn't start in 20 seconds."
-            exit 5
-        }
-        Start-Sleep -seconds 2  
-        $tries = $tries + 1
-    }    
-
-    # TODO: We need to create the database "World" 
-
-    # TODO: We need to create the database "Fortune"
-    
-    # TODO: Import using the http://localhost:8080/databases/{database}/smuggler/import-dir?dir={directory} both databases.    
-
-
-    # We will wait forever or the service goes down, whatever happens first :D
-    while ($serviceInstance.Status -eq 'Running')
-    {
-        Write-Host 'Service is running.'
-        Start-Sleep -seconds 10    
-        $serviceInstance.Refresh()
-    }
+function CreateDatabase($dbName) {
+Invoke-WebRequest -Uri "$($env:RAVEN_ServerUrl)/admin/databases?name=$dbName&replicationFactor=1" `
+    -Method "PUT" `
+    -Body "{`"DatabaseName`":`"$dbName`",`"Settings`":{},`"Disabled`":false,`"Encrypted`":false,`"Topology`":{`"DynamicNodesDistribution`":false}}"
 }
-catch
-{
-    write-error $_.Exception
-    exit 4
+
+Add-Type -AssemblyName System.Web
+function GetImportUri($dbName, $filePath) {
+    $encodedFilePath = [System.Net.WebUtility]::UrlEncode($filePath);
+    return "$($env:RAVEN_ServerUrl)/databases/$dbName/admin/smuggler/import?file=$encodedFilePath"
+}
+
+# import dbs
+CreateDatabase("world")
+$worldImportUri = GetImportUri "world" "C:\datadumps\TechEmpower-World.ravendbdump"
+Invoke-WebRequest -Uri $worldImportUri 
+
+CreateDatabase("fortunes")
+$fortunesImportUri = GetImportUri "fortunes" "C:\datadumps\TechEmpower-Fortunes.ravendbdump"
+Invoke-WebRequest -Uri $fortunesImportUri
+
+write-host "All data imported."
+
+while (!$ravenProcess.HasExited) {
+    Start-Sleep -Seconds 5
 }
